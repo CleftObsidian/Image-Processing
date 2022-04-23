@@ -1,0 +1,11 @@
+﻿  KhuGleWin.cpp
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\KhuGleWin.cpp(352,80): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\KhuGleWin.cpp(370,75): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\KhuGleWin.cpp(414,61): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\KhuGleWin.cpp(526,12): warning C4244: 'return': conversion from 'WPARAM' to 'int', possible loss of data
+  Main.cpp
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\Main.cpp(302,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  SoundPlayWin.cpp
+C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\KhuGle\SoundPlayWin.cpp(21,58): warning C4312: 'type cast': conversion from 'DWORD' to 'LPWAVEHDR' of greater size
+  Generating Code...
+  KhuGle.vcxproj -> C:\Users\cdjoo\Desktop\2022-1\인공지능과게임프로그래밍\KhuGle-main\06. KhuGle(Image Processing)\x64\Debug\KhuGle.exe
