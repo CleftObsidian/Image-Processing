@@ -132,8 +132,6 @@ void CImageProcessing::Update()
 		{
 			for (int x = 0; x < m_pImageLayer->m_nW; ++x)
 			{
-				std::cout << 0.299 * InputR[y][x] + 0.587 * InputG[y][x] + 0.114 * InputB[y][x] + 0.0 << '\n' << -0.169 * InputR[y][x] + -0.331 * InputG[y][x] + 0.499 * InputB[y][x] + 128.0 << '\n'
-					<< 0.499 * InputR[y][x] + -0.418 * InputG[y][x] + -0.0813 * InputB[y][x] + 128.0 << '\n' << std::endl;
 				Y[y][x] = 0.299 * InputR[y][x] + 0.587 * InputG[y][x] + 0.114 * InputB[y][x] + 0.0;
 				Cb[y][x] = -0.169 * InputR[y][x] + -0.331 * InputG[y][x] + 0.499 * InputB[y][x] + 128.0;
 				Cr[y][x] = 0.499 * InputR[y][x] + -0.418 * InputG[y][x] + -0.0813 * InputB[y][x] + 128.0;
