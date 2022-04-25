@@ -20,16 +20,28 @@
 #endif
 #endif  // _DEBUG
 
-constexpr int Quantum[8][8] =
+constexpr const unsigned char QuantumY[8][8] =
 {
-	{ 3, 5, 7, 9, 11, 13, 15, 17 },
-	{ 5, 7, 9, 11, 13, 15, 17, 19 },
-	{ 7, 9, 11, 13, 15, 17, 19, 21 },
-	{ 9, 11, 13, 15, 17, 19, 21, 23 },
-	{ 11, 13, 15, 17, 19, 21, 23, 25 },
-	{ 13, 15, 17, 19, 21, 23, 25, 27 },
-	{ 15, 17, 19, 21, 23, 25, 27, 29 },
-	{ 17, 19, 21, 23, 25, 27, 29, 31 },
+	{ 16, 11, 10, 16,  24,  40,  51,  61, },
+	{ 12, 12, 14, 19,  26,  58,  60,  66, },
+	{ 14, 13, 16, 24,  40,  57,  69,  57, },
+	{ 14, 17, 22, 29,  51,  87,  80,  62, },
+	{ 18, 22, 37, 56,  68, 109, 103,  77, },
+	{ 24, 36, 55, 64,  81, 104, 113,  92, },
+	{ 49, 64, 78, 87, 103, 121, 120, 101, },
+	{ 72, 92, 95, 98, 112, 100, 103,  99,},
+};
+
+constexpr const unsigned char QuantumCbCr[8][8] =
+{
+	{ 17, 18, 24, 47, 99, 99, 99, 99, },
+	{ 18, 21, 26, 66, 99, 99, 99, 99, },
+	{ 24, 26, 56, 99, 99, 99, 99, 99, },
+	{ 47, 66, 99, 99, 99, 99, 99, 99, },
+	{ 99, 99, 99, 99, 99, 99, 99, 99, },
+	{ 99, 99, 99, 99, 99, 99, 99, 99, },
+	{ 99, 99, 99, 99, 99, 99, 99, 99, },
+	{ 99, 99, 99, 99, 99, 99, 99, 99, },
 };
 
 class CKhuGleImageLayer : public CKhuGleLayer {
@@ -98,19 +110,19 @@ void CImageProcessing::Update()
 {
 	BOOL b_isQuantized = FALSE;
 
-	if (m_bKeyPressed['\t'])
+	if (m_bKeyPressed[' '])
 	{
 		double** InputR = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
 		double** InputG = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
 		double** InputB = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
 
 		double** Y = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		double** Cb = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		double** Cr = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
+		double** Cb = dmatrix(m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
+		double** Cr = dmatrix(m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 
 		double** OutY = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		double** OutCb = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		double** OutCr = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
+		double** OutCb = dmatrix(m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
+		double** OutCr = dmatrix(m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 
 		int QuantizedY[8][8] = { 0 };
 		int QuantizedCb[8][8] = { 0 };
@@ -128,58 +140,82 @@ void CImageProcessing::Update()
 		}
 
 		// RGB to YCbCr
-		for (int y = 0; y < m_pImageLayer->m_nH; ++y)
+		for (int y = 0; y < m_pImageLayer->m_Image.m_nH; ++y)
 		{
-			for (int x = 0; x < m_pImageLayer->m_nW; ++x)
+			for (int x = 0; x < m_pImageLayer->m_Image.m_nW; ++x)
 			{
 				Y[y][x] = 0.299 * InputR[y][x] + 0.587 * InputG[y][x] + 0.114 * InputB[y][x] + 0.0;
-				Cb[y][x] = -0.169 * InputR[y][x] + -0.331 * InputG[y][x] + 0.499 * InputB[y][x] + 128.0;
-				Cr[y][x] = 0.499 * InputR[y][x] + -0.418 * InputG[y][x] + -0.0813 * InputB[y][x] + 128.0;
 			}
 		}
+		double tempCb = 0.0;
+		double tempCr = 0.0;
+		for (int y = 0; y < m_pImageLayer->m_Image.m_nH; y += 2)
+		{
+			for (int x = 0; x < m_pImageLayer->m_Image.m_nW; x += 2)
+			{
+				for (int i = 0; i < 2; ++i)
+				{
+					for (int j = 0; j < 2; ++j)
+					{
+						tempCb += -0.169 * InputR[y + i][x + j] + -0.331 * InputG[y + i][x + j] + 0.499 * InputB[y + i][x + j] + 128.0;
+						tempCr += 0.499 * InputR[y + i][x + j] + -0.418 * InputG[y + i][x + j] + -0.0813 * InputB[y + i][x + j] + 128.0;
+					}
+				}
+				Cb[y / 2][x / 2] = tempCb / 4;
+				Cr[y / 2][x / 2] = tempCr / 4;
+				tempCb = 0.0;
+				tempCr = 0.0;
+			}
+		}
+		std::cout << "Convert RGB->YCbCr" << std::endl;
 
 		// DCT
 		DCT2D(Y, OutY, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
-		DCT2D(Cb, OutCb, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
-		DCT2D(Cr, OutCr, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
+		DCT2D(Cb, OutCb, m_pImageLayer->m_Image.m_nW / 2, m_pImageLayer->m_Image.m_nH / 2, 8);
+		DCT2D(Cr, OutCr, m_pImageLayer->m_Image.m_nW / 2, m_pImageLayer->m_Image.m_nH / 2, 8);
+		std::cout << "DCT" << std::endl;
 
 		// Quantization
 		for (int i = 0; i < 8; ++i)
 		{
 			for (int j = 0; j < 8; ++j)
 			{
-				QuantizedY[i][j] = (int)(OutY[i][j] / Quantum[i][j]);
-				QuantizedCb[i][j] = (int)(OutCb[i][j] / Quantum[i][j]);
-				QuantizedCr[i][j] = (int)(OutCr[i][j] / Quantum[i][j]);
+				QuantizedY[i][j] = (int)(OutY[i][j] / QuantumY[i][j]);
+				QuantizedCb[i][j] = (int)(OutCb[i][j] / QuantumCbCr[i][j]);
+				QuantizedCr[i][j] = (int)(OutCr[i][j] / QuantumCbCr[i][j]);
 			}
 		}
+		std::cout << "Quantization" << std::endl;
 
 		// Dequantization
 		for (int i = 0; i < 8; ++i)
 		{
 			for (int j = 0; j < 8; ++j)
 			{
-				OutY[i][j] = (double)QuantizedY[i][j] * Quantum[i][j];
-				OutCb[i][j] = (double)QuantizedCb[i][j] * Quantum[i][j];
-				OutCr[i][j] = (double)QuantizedCr[i][j] * Quantum[i][j];
+				OutY[i][j] = (double)QuantizedY[i][j] * QuantumY[i][j];
+				OutCb[i][j] = (double)QuantizedCb[i][j] * QuantumCbCr[i][j];
+				OutCr[i][j] = (double)QuantizedCr[i][j] * QuantumCbCr[i][j];
 			}
 		}
+		std::cout << "Dequantization" << std::endl;
 
 		// IDCT
 		IDCT2D(OutY, Y, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
-		IDCT2D(OutCb, Cb, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
-		IDCT2D(OutCr, Cr, m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH, 8);
+		IDCT2D(OutCb, Cb, m_pImageLayer->m_Image.m_nW / 2, m_pImageLayer->m_Image.m_nH / 2, 8);
+		IDCT2D(OutCr, Cr, m_pImageLayer->m_Image.m_nW / 2, m_pImageLayer->m_Image.m_nH / 2, 8);
+		std::cout << "IDCT" << std::endl;
 
 		// YCbCr to RGB
-		for (int y = 0; y < m_pImageLayer->m_nH; ++y)
+		for (int y = 0; y < m_pImageLayer->m_Image.m_nH; ++y)
 		{
-			for (int x = 0; x < m_pImageLayer->m_nW; ++x)
+			for (int x = 0; x < m_pImageLayer->m_Image.m_nW; ++x)
 			{
-				m_pImageLayer->m_ImageOut.m_Red[y][x] = std::clamp(Y[y][x] + 1.402 * (Cr[y][x] - 128), 0.0, 255.0);
-				m_pImageLayer->m_ImageOut.m_Green[y][x] = std::clamp(Y[y][x] - 0.344 * (Cb[y][x] - 128) - 0.714 * (Cr[y][x] - 128), 0.0, 255.0);
-				m_pImageLayer->m_ImageOut.m_Blue[y][x] = std::clamp(Y[y][x] + 1.772 * (Cb[y][x] - 128), 0.0, 255.0);
+				m_pImageLayer->m_ImageOut.m_Red[y][x] = std::clamp(Y[y][x] + 1.402 * (Cr[y / 2][x / 2] - 128), 0.0, 255.0);
+				m_pImageLayer->m_ImageOut.m_Green[y][x] = std::clamp(Y[y][x] - 0.344 * (Cb[y / 2][x / 2] - 128) - 0.714 * (Cr[y / 2][x / 2] - 128), 0.0, 255.0);
+				m_pImageLayer->m_ImageOut.m_Blue[y][x] = std::clamp(Y[y][x] + 1.772 * (Cb[y / 2][x / 2] - 128), 0.0, 255.0);
 			}
 		}
+		std::cout << "Convert YCbCr->RGB" << std::endl;
 
 		// Draw
 		m_pImageLayer->DrawBackgroundImage();
@@ -189,7 +225,7 @@ void CImageProcessing::Update()
 			m_pImageLayer->m_ImageOut.m_Red, m_pImageLayer->m_ImageOut.m_Green, m_pImageLayer->m_ImageOut.m_Blue,
 			m_pImageLayer->m_Image.m_nW, m_pImageLayer->m_Image.m_nH);
 
-		std::cout << "PSNR: " << Psnr << std::endl;
+		std::cout << "PSNR: " << Psnr << '\n' << std::endl;
 
 		// Release memory
 		free_dmatrix(InputR, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
@@ -197,24 +233,14 @@ void CImageProcessing::Update()
 		free_dmatrix(InputB, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
 
 		free_dmatrix(Y, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		free_dmatrix(Cb, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		free_dmatrix(Cr, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
+		free_dmatrix(Cb, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
+		free_dmatrix(Cr, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 
 		free_dmatrix(OutY, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		free_dmatrix(OutCb, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
-		free_dmatrix(OutCr, m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
+		free_dmatrix(OutCb, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
+		free_dmatrix(OutCr, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 
-		for (int i = 0; i < 8; ++i)
-		{
-			delete[] QuantizedY[i];
-			delete[] QuantizedCb[i];
-			delete[] QuantizedCr[i];
-		}
-		delete[] QuantizedY;
-		delete[] QuantizedCb;
-		delete[] QuantizedCr;
-
-		m_bKeyPressed['\t'] = false;
+		m_bKeyPressed[' '] = false;
 	}
 
 	if(m_bKeyPressed['D'] || m_bKeyPressed['I'] || m_bKeyPressed['C']
