@@ -4,6 +4,7 @@
 //
 #include "KhuGleWin.h"
 #include "KhuGleSignal.h"
+#include "Huffman.h"
 #include <iostream>
 #include <algorithm>
 
@@ -29,7 +30,7 @@ constexpr const unsigned char QuantumY[8][8] =
 	{ 18, 22, 37, 56,  68, 109, 103,  77, },
 	{ 24, 36, 55, 64,  81, 104, 113,  92, },
 	{ 49, 64, 78, 87, 103, 121, 120, 101, },
-	{ 72, 92, 95, 98, 112, 100, 103,  99,},
+	{ 72, 92, 95, 98, 112, 100, 103,  99, },
 };
 
 constexpr const unsigned char QuantumCbCr[8][8] =
@@ -110,7 +111,7 @@ void CImageProcessing::Update()
 {
 	BOOL b_isQuantized = FALSE;
 
-	if (m_bKeyPressed[' '])
+	if (m_bKeyPressed['1'] || m_bKeyPressed['2'] || m_bKeyPressed['3'])
 	{
 		double** InputR = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
 		double** InputG = dmatrix(m_pImageLayer->m_Image.m_nH, m_pImageLayer->m_Image.m_nW);
@@ -175,6 +176,33 @@ void CImageProcessing::Update()
 		DCT2D(Cr, OutCr, m_pImageLayer->m_Image.m_nW / 2, m_pImageLayer->m_Image.m_nH / 2, 8);
 		std::cout << "DCT" << std::endl;
 
+		if (m_bKeyPressed['2'])
+		{
+			// Compression
+			for (int y = 0; y < m_pImageLayer->m_ImageOut.m_nH; ++y)
+			{
+				for (int x = 0; x < m_pImageLayer->m_ImageOut.m_nW; ++x)
+				{
+					if (x % 8 > 3 || y % 8 > 3)
+					{
+						OutY[y][x] = 0;
+					}
+				}
+			}
+			for (int y = 0; y < m_pImageLayer->m_ImageOut.m_nH / 2; ++y)
+			{
+				for (int x = 0; x < m_pImageLayer->m_ImageOut.m_nW / 2; ++x)
+				{
+					if (x % 8 > 3 || y % 8 > 3)
+					{
+						OutCb[y][x] = 0;
+						OutCr[y][x] = 0;
+					}
+				}
+			}
+			std::cout << "Compression" << std::endl;
+		}
+
 		// Quantization
 		for (int i = 0; i < 8; ++i)
 		{
@@ -186,6 +214,73 @@ void CImageProcessing::Update()
 			}
 		}
 		std::cout << "Quantization" << std::endl;
+
+		// Entropy encoding(Huffman coding)
+		if (m_bKeyPressed['3'])
+		{
+			std::vector<int> dataY;
+			std::vector<int> dataCb;
+			std::vector<int> dataCr;
+			for (int i = 0; i < 8; ++i)
+			{
+				for (int j = 0; j < 8; ++j)
+				{
+					dataY.push_back(QuantizedY[i][j]);
+					dataCb.push_back(QuantizedCb[i][j]);
+					dataCr.push_back(QuantizedCr[i][j]);
+				}
+			}
+
+			std::cout << "Input Data(Y): ";
+			for (int i : dataY)
+			{
+				std::cout << i << ' ';
+			}
+			std::cout << std::endl;
+
+			std::cout << "Input Data(Cb): ";
+			for (int i : dataCb)
+			{
+				std::cout << i << ' ';
+			}
+			std::cout << std::endl;
+
+			std::cout << "Input Data(Cr): ";
+			for (int i : dataCr)
+			{
+				std::cout << i << ' ';
+			}
+			std::cout << std::endl;
+
+			Huffman huffY;
+			Huffman huffCb;
+			Huffman huffCr;
+
+			huffY.Encoding(dataY);
+			huffCb.Encoding(dataCb);
+			huffCr.Encoding(dataCr);
+			std::cout << "Entropy encoded" << std::endl;
+
+			std::cout << "Encoding Result(Y): " << huffY.GetCode() << std::endl;
+			std::cout << "Encoding Result(Cb): " << huffY.GetCode() << std::endl;
+			std::cout << "Encoding Result(Cr): " << huffY.GetCode() << std::endl;
+
+			std::cout << "Data Compression Ratio(Y): " << (dataY.size() * sizeof(int)) / (huffY.GetCode().length() * sizeof(char)) << std::endl;
+			std::cout << "Data Compression Ratio(Cb): " << (dataCb.size() * sizeof(int)) / (huffCb.GetCode().length() * sizeof(char)) << std::endl;
+			std::cout << "Data Compression Ratio(Cr): " << (dataCr.size() * sizeof(int)) / (huffCr.GetCode().length() * sizeof(char)) << std::endl;
+
+			dataY = huffY.Decoding();
+			dataCb = huffY.Decoding();
+			dataCr = huffY.Decoding();
+			std::cout << "Decoded" << std::endl;
+
+			for (int i = 0; i < 64; ++i)
+			{
+				QuantizedY[i / 8][i % 8] = dataY[i];
+				QuantizedCb[i / 8][i % 8] = dataCb[i];
+				QuantizedCr[i / 8][i % 8] = dataCr[i];
+			}
+		}
 
 		// Dequantization
 		for (int i = 0; i < 8; ++i)
@@ -240,7 +335,9 @@ void CImageProcessing::Update()
 		free_dmatrix(OutCb, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 		free_dmatrix(OutCr, m_pImageLayer->m_Image.m_nH / 2, m_pImageLayer->m_Image.m_nW / 2);
 
-		m_bKeyPressed[' '] = false;
+		m_bKeyPressed['1'] = false;
+		m_bKeyPressed['2'] = false;
+		m_bKeyPressed['3'] = false;
 	}
 
 	if(m_bKeyPressed['D'] || m_bKeyPressed['I'] || m_bKeyPressed['C']
