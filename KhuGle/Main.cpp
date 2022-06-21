@@ -265,9 +265,12 @@ void CImageProcessing::Update()
 			std::cout << "Encoding Result(Cb): " << huffY.GetCode() << std::endl;
 			std::cout << "Encoding Result(Cr): " << huffY.GetCode() << std::endl;
 
-			std::cout << "Data Compression Ratio(Y): " << (dataY.size() * sizeof(int)) / (huffY.GetCode().length() * sizeof(char)) << std::endl;
-			std::cout << "Data Compression Ratio(Cb): " << (dataCb.size() * sizeof(int)) / (huffCb.GetCode().length() * sizeof(char)) << std::endl;
-			std::cout << "Data Compression Ratio(Cr): " << (dataCr.size() * sizeof(int)) / (huffCr.GetCode().length() * sizeof(char)) << std::endl;
+			std::cout << "Data Compression Ratio(Y, vs quantized data): " << (dataY.size() * sizeof(int)) / (huffY.GetCode().length() * sizeof(char)) << std::endl;
+			std::cout << "Data Compression Ratio(Cb, vs quantized data): " << (dataCb.size() * sizeof(int)) / (huffCb.GetCode().length() * sizeof(char)) << std::endl;
+			std::cout << "Data Compression Ratio(Cr, vs quantized data): " << (dataCr.size() * sizeof(int)) / (huffCr.GetCode().length() * sizeof(char)) << std::endl;
+
+			std::cout << "Data Compression Ratio(vs RGB): " << (sizeof(char) * m_pImageLayer->m_Image.m_nH * m_pImageLayer->m_Image.m_nW)
+																/ (sizeof(char) * (huffY.GetCode().length() + huffCb.GetCode().length() + huffCr.GetCode().length())) << std::endl;
 
 			dataY = huffY.Decoding();
 			dataCb = huffY.Decoding();

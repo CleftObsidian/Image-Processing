@@ -1,18 +1,18 @@
 ﻿  Main.cpp
-C:\sourcetree\Image-Processing\KhuGle\Main.cpp(308,55): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
+C:\sourcetree\Image-Processing\KhuGle\Main.cpp(311,55): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
           with
           [
               _Ty=double
           ]
-C:\sourcetree\Image-Processing\KhuGle\Main.cpp(309,57): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
+C:\sourcetree\Image-Processing\KhuGle\Main.cpp(312,57): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
           with
           [
               _Ty=double
           ]
-C:\sourcetree\Image-Processing\KhuGle\Main.cpp(310,56): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
+C:\sourcetree\Image-Processing\KhuGle\Main.cpp(313,56): warning C4244: '=': conversion from 'const _Ty' to 'unsigned char', possible loss of data
           with
           [
               _Ty=double
           ]
-C:\sourcetree\Image-Processing\KhuGle\Main.cpp(559,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\sourcetree\Image-Processing\KhuGle\Main.cpp(562,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   KhuGle.vcxproj -> C:\sourcetree\Image-Processing\x64\Debug\KhuGle.exe
